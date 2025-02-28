@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  name      String
+  email     String  @unique
+  password  String
+  role      String  @default("user") // user, admin
+  banned    Boolean @default(false)
+  recipes   Recipe[]
+  comments  Comment[]
+  createdAt DateTime @default(now())
+}
+
+model Recipe {
+  id          Int     @id @default(autoincrement())
+  title       String
+  content     String
+  imageUrl    String? // ✅ เพิ่มฟิลด์เก็บ URL รูปภาพ
+  author      User    @relation(fields: [authorId], references: [id])
+  authorId    Int
+  isApproved  Boolean @default(false) // Admin ต้องอนุมัติ
+  comments    Comment[]
+  createdAt   DateTime @default(now())
+}
+
+model Comment {
+  id        Int     @id @default(autoincrement())
+  content   String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  recipe    Recipe  @relation(fields: [recipeId], references: [id])
+  recipeId  Int
+  createdAt DateTime @default(now())
+}
